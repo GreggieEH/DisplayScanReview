@@ -1,0 +1,80 @@
+// MyIDL.idl
+// IDL file for the Simple Com object
+
+#include "dispids.h"
+
+[
+	uuid(765A8311-6F20-4C27-BFA1-752FB293421B),
+	helpstring(""),
+	version(1.0)
+]
+library DisplayScanReview
+{
+	importlib("stdole32.tlb");
+	[
+		uuid(581B701B-70E1-4055-B112-E053E93359D0),
+		helpstring("Interface")
+	]
+	dispinterface IDisplayScanReview
+	{
+	properties:
+		[id(DISPID_FileComment)]
+		BSTR			FileComment;
+		[id(DISPID_WorkingDirectory)]
+		BSTR			WorkingDirectory;
+		[id(DISPID_LockinState)]
+		VARIANT_BOOL	LockinState;
+		[id(DISPID_LockinGain)]
+		BSTR			LockinGain;
+		[id(DISPID_LockinTimeConstant)]
+		BSTR			LockinTimeConstant;
+		[id(DISPID_DetectorName)]
+		BSTR			DetectorName;
+		[id(DISPID_DetectorGain)]
+		BSTR			DetectorGain;
+		[id(DISPID_DetectorTemperature)]
+		BSTR			DetectorTemperature;
+		[id(DISPID_InputOptic)]
+		BSTR			InputOptic;
+		[id(DISPID_StartWave), bindable]
+		double			StartWave;
+		[id(DISPID_StopWave), bindable]
+		double			StopWave;
+		[id(DISPID_StepSize), bindable]
+		double			StepSize;
+		[id(DISPID_DwellTime), bindable]
+		BSTR			DwellTime;
+		[id(DISPID_ScanType)]
+		BSTR			ScanType;
+		[id(DISPID_AutoGain), bindable]
+		VARIANT_BOOL	AutoGain;
+		[id(DISPID_AutoTimeConstant), bindable]
+		VARIANT_BOOL	AutoTimeConstant;
+		[id(DISPID_GratingAutoSelect), bindable]
+		VARIANT_BOOL	GratingAutoSelect;
+		[id(DISPID_FilterAutoSelect), bindable]
+		VARIANT_BOOL	FilterAutoSelect;
+	methods:
+		[id(DISPID_DisplayWindow), helpstring("Display the dialog window")]
+		VARIANT_BOOL		DisplayWindow(
+								[in]		long		hwndParent);
+	}
+	[
+		uuid(2402515A-2182-499C-A602-4B6E4E734D33),
+		helpstring(" event interface")
+	]
+	dispinterface _DisplayScanReview
+	{
+	properties:
+	methods:
+	}
+	[
+		uuid(EB23185F-66AA-46F9-A0DE-AFFBE9025996),
+		helpstring("class")
+	]
+	coclass DisplayScanReview
+	{
+		[default]				dispinterface			IDisplayScanReview;
+		[default, source]		dispinterface			_DisplayScanReview;
+	}
+}
