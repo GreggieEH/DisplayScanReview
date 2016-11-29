@@ -1,24 +1,162 @@
 #include "stdafx.h"
 #include "DlgScanReview.h"
 #include "resource.h"
+#include "MyDisplayScanReview.h"
 
 #define			HEADING_HEIGHT			25
 #define			BOX_HEIGHT				20
 
-CDlgScanReview::CDlgScanReview() :
-	CMyDialog(IDD_DIALOGScanReview)
+CDlgScanReview::CDlgScanReview(CMyDisplayScanReview * pMyDisplayScanReview) :
+	CMyDialog(IDD_DIALOGScanReview),
+	m_pMyDisplayScanReview(pMyDisplayScanReview)
 {
-	// TODO fill in the value data
-
-
+	this->m_pMyDisplayScanReview->GetDetectorName(this->m_szDetector, MAX_PATH);
+	// fill in the value data
+	TCHAR			szString[MAX_PATH];
+	size_t			slen;
+	this->m_valueData[INDEX_FILECOMMENT].SetNameString(L"FileComment");
+	this->m_pMyDisplayScanReview->GetFileComment(szString, MAX_PATH);
+	this->m_valueData[INDEX_FILECOMMENT].SetValueString(szString);
+	this->m_valueData[INDEX_WORKINGDIRECTORY].SetNameString(L"Working Directory");
+	this->m_pMyDisplayScanReview->GetWorkingDirectory(szString, MAX_PATH);
+	this->m_valueData[INDEX_WORKINGDIRECTORY].SetValueString(szString);
+	this->m_valueData[INDEX_LOCKINSTATE].SetNameString(L"Lockin State");
+	if (this->m_pMyDisplayScanReview->GetLockinState())
+	{
+		this->m_valueData[INDEX_LOCKINSTATE].SetValueString(L"on");
+		this->m_pMyDisplayScanReview->GetLockinGain(szString, MAX_PATH);
+		StringCchLength(szString, MAX_PATH, &slen);
+		if (slen > 0)
+		{
+			this->m_valueData[INDEX_LOCKINGAIN].SetValueString(szString);
+		}
+		else
+		{
+			this->m_valueData[INDEX_LOCKINGAIN].SetBackColor(RGB(255, 0, 0));
+			this->m_valueData[INDEX_LOCKINGAIN].SetValueString(L"NOT SET");
+		}
+		this->m_pMyDisplayScanReview->GetLockinTimeConstant(szString, MAX_PATH);
+		StringCchLength(szString, MAX_PATH, &slen);
+		if (slen > 0)
+		{
+			this->m_valueData[INDEX_LOCKINTIMECONSTANT].SetValueString(szString);
+		}
+		else
+		{
+			this->m_valueData[INDEX_LOCKINTIMECONSTANT].SetBackColor(RGB(255, 0, 0));
+			this->m_valueData[INDEX_LOCKINTIMECONSTANT].SetValueString(L"NOT SET");
+		}
+	}
+	else
+	{
+		this->m_valueData[INDEX_LOCKINSTATE].SetValueString(L"off");
+	}
+	this->m_pMyDisplayScanReview->GetDetectorName(szString, MAX_PATH);
+	StringCchLength(szString, MAX_PATH, &slen);
+	if (slen > 0)
+	{
+		this->m_valueData[INDEX_DETECTORNAME].SetValueString(szString);
+	}
+	else
+	{
+		this->m_valueData[INDEX_DETECTORNAME].SetBackColor(RGB(255, 0, 0));
+		this->m_valueData[INDEX_DETECTORNAME].SetValueString(L"NOT SET");
+	}
+	this->m_pMyDisplayScanReview->GetDetectorGain(szString, MAX_PATH);
+	StringCchLength(szString, MAX_PATH, &slen);
+	if (slen > 0)
+	{
+		this->m_valueData[INDEX_DETECTORGAIN].SetValueString(szString);
+	}
+	else
+	{
+		this->m_valueData[INDEX_DETECTORGAIN].SetBackColor(RGB(255, 0, 0));
+		this->m_valueData[INDEX_DETECTORGAIN].SetValueString(L"NOT SET");
+	}
+	this->m_pMyDisplayScanReview->GetDetectorTemperature(szString, MAX_PATH);
+	StringCchLength(szString, MAX_PATH, &slen);
+	if (slen > 0)
+	{
+		this->m_valueData[INDEX_DETECTORTEMPERATURE].SetValueString(szString);
+	}
+	else
+	{
+		this->m_valueData[INDEX_DETECTORTEMPERATURE].SetValueString(L"NOT SET");
+	}
+	this->m_pMyDisplayScanReview->GetInputOptic(szString, MAX_PATH);
+	StringCchLength(szString, MAX_PATH, &slen);
+	if (slen > 0)
+	{
+		this->m_valueData[INDEX_INPUTOPTIC].SetValueString(szString);
+	}
+	else
+	{
+		this->m_valueData[INDEX_INPUTOPTIC].SetBackColor(RGB(255, 0, 0));
+		this->m_valueData[INDEX_INPUTOPTIC].SetValueString(L"NOT SET");
+	}
+	_stprintf_s(szString, L"%6.2f", (float)this->m_pMyDisplayScanReview->GetStartWave());
+	this->m_valueData[INDEX_STARTWAVE].SetValueString(szString);
+	_stprintf_s(szString, L"%6.2f", (float) this->m_pMyDisplayScanReview->GetStopWave());
+	this->m_valueData[INDEX_STOPWAVE].SetValueString(szString);
+	_stprintf_s(szString, L"%5.2f", (float)this->m_pMyDisplayScanReview->GetStepSize());
+	this->m_valueData[INDEX_STEPSIZE].SetValueString(szString);
+	_stprintf_s(szString, L"%5.2f", (float)this->m_pMyDisplayScanReview->GetDwellTime());
+	this->m_valueData[INDEX_DWELLTIME].SetValueString(szString);
+	this->m_pMyDisplayScanReview->GetScanType(szString, MAX_PATH);
+	this->m_valueData[INDEX_SCANTYPE].SetValueString(szString);
+	if (this->m_pMyDisplayScanReview->GetAutoGain())
+	{
+		this->m_valueData[INDEX_AUTOGAIN].SetValueString(L"on");
+	}
+	else
+	{
+		this->m_valueData[INDEX_AUTOGAIN].SetValueString(L"off");
+		this->m_valueData[INDEX_AUTOGAIN].SetTextColor(RGB(255, 0, 0));
+	}
+	if (this->m_pMyDisplayScanReview->GetAutoTimeConstant())
+	{
+		this->m_valueData[INDEX_AUTOTIMECONSTANT].SetValueString(L"on");
+	}
+	else
+	{
+		this->m_valueData[INDEX_AUTOTIMECONSTANT].SetValueString(L"off");
+		this->m_valueData[INDEX_AUTOTIMECONSTANT].SetTextColor(RGB(255, 0, 0));
+	}
+	if (this->m_pMyDisplayScanReview->GetGratingAutoSelect())
+	{
+		this->m_valueData[INDEX_GRATINGAUTOSELECT].SetValueString(L"on");
+	}
+	else
+	{
+		this->m_valueData[INDEX_GRATINGAUTOSELECT].SetValueString(L"off");
+		this->m_valueData[INDEX_GRATINGAUTOSELECT].SetTextColor(RGB(255, 0, 0));
+	}
+	if (this->m_pMyDisplayScanReview->GetFilterAutoSelect())
+	{
+		this->m_valueData[INDEX_FILTERAUTOSELECT].SetValueString(L"on");
+	}
+	else
+	{
+		this->m_valueData[INDEX_FILTERAUTOSELECT].SetValueString(L"off");
+		this->m_valueData[INDEX_FILTERAUTOSELECT].SetTextColor(RGB(255, 0, 0));
+	}
+	// flag initialize before measurement
+	m_fInitializeBeforeMeasure = this->m_pMyDisplayScanReview->GetInitializeBeforeMeasurement();
 }
 
 CDlgScanReview::~CDlgScanReview()
 {
 }
 
+BOOL CDlgScanReview::GetInitializeBeforeMeasure()		// get the initialize before measure flag
+{
+	return this->m_fInitializeBeforeMeasure;
+}
+
 BOOL CDlgScanReview::OnInitDialog()
 {
+	TCHAR			szString[MAX_PATH];
+
 	// subclass the grid display
 	this->SubclassLabelWindow(IDC_MYGRID);
 	// subclass the grating scan display
@@ -27,6 +165,14 @@ BOOL CDlgScanReview::OnInitDialog()
 	this->SubclassLabelWindow(IDC_LBLHARDWARESETUP);
 	this->SubclassLabelWindow(IDC_LBLOUTPUTPORT);
 	this->SubclassLabelWindow(IDC_LBLSIGNALCABLE);
+	// highlight words
+	SetDlgItemText(this->GetMyDialog(), IDC_DETECTOR, this->m_szDetector);
+	StringCchPrintf(szString, MAX_PATH, L"%s signal", this->m_szDetector);
+	SetDlgItemText(this->GetMyDialog(), IDC_LBLDETECTORSIGNAL, szString);
+	this->SubclassLabelWindow(IDC_DETECTOR);
+	this->SubclassLabelWindow(IDC_LBLDETECTORSIGNAL);
+	// display initialize before measure
+	this->DisplayInitializeBeforeMeasure();
 	// call the base class
 	return CMyDialog::OnInitDialog();
 }
@@ -36,6 +182,29 @@ BOOL CDlgScanReview::OnReturnClicked(
 {
 	return FALSE;
 }
+
+BOOL CDlgScanReview::OnCommand(
+	WORD		wmID,
+	WORD		wmEvent)
+{
+	if (IDC_CHKINITIALIZEBEFOREMEASUREMENT == wmID)
+	{
+		if (BN_CLICKED == wmEvent)
+		{
+			this->m_fInitializeBeforeMeasure = !this->m_fInitializeBeforeMeasure;		// toggle on/off
+			this->DisplayInitializeBeforeMeasure();
+			return TRUE;
+		}
+	}
+	return CMyDialog::OnCommand(wmID, wmEvent);
+}
+
+void CDlgScanReview::DisplayInitializeBeforeMeasure()
+{
+	Button_SetCheck(GetDlgItem(this->GetMyDialog(), IDC_CHKINITIALIZEBEFOREMEASUREMENT),
+		this->m_fInitializeBeforeMeasure ? BST_CHECKED : BST_UNCHECKED);
+}
+
 
 // subclass a label window
 void CDlgScanReview::SubclassLabelWindow(
@@ -86,6 +255,10 @@ LRESULT CALLBACK SubclassProcMyGrid(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 				EndPaint(hwnd, &ps);
 				return 0;
 			}
+			else if (IDC_LBLDETECTORSIGNAL == nID || IDC_DETECTOR == nID)
+			{
+				pStr->pDlg->HighlightWord(hwnd, pStr->pDlg->m_szDetector, RGB(255, 0, 0));
+			}
 		}
 		break;
 	case WM_DESTROY:
@@ -116,6 +289,8 @@ void CDlgScanReview::OnPaintMyGrid()
 	int			i;
 	RECT		rcGrid;				// grid
 	int			valueIndex;
+	TCHAR		szString[MAX_PATH];
+	double		slitWidth;
 
 	GetClientRect(hwnd, &rc);
 	widthby2 = (rc.right - rc.left) / 2;
@@ -399,21 +574,38 @@ void CDlgScanReview::OnPaintMyGrid()
 		switch (i)
 		{
 		case 0:
-			this->PutValueString(hdc, &rcGrid, L"Slit Label #1", RGB(255, 255, 255), RGB(0, 0, 0));
+			if (this->m_pMyDisplayScanReview->GetSlitInfo(L"inputSlit", szString, MAX_PATH, &slitWidth))
+			{
+				this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+				rcGrid.left = x + widthby2;
+				rcGrid.right = rcGrid.left + widthby2;
+				_stprintf_s(szString, L"width %5.2f (nm)", (float)slitWidth);
+				this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+			}
 			break;
 		case 1:
-			this->PutValueString(hdc, &rcGrid, L"Slit Label #2", RGB(255, 255, 255), RGB(0, 0, 0));
+			if (this->m_pMyDisplayScanReview->GetSlitInfo(L"outputSlit", szString, MAX_PATH, &slitWidth))
+			{
+				this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+				rcGrid.left = x + widthby2;
+				rcGrid.right = rcGrid.left + widthby2;
+				_stprintf_s(szString, L"width %5.2f (nm)", (float)slitWidth);
+				this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+			}
 			break;
 		case 2:
-			this->PutValueString(hdc, &rcGrid, L"Slit Label #3", RGB(255, 255, 255), RGB(0, 0, 0));
+			if (this->m_pMyDisplayScanReview->GetSlitInfo(L"intermediateSlit", szString, MAX_PATH, &slitWidth))
+			{
+				this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+				rcGrid.left = x + widthby2;
+				rcGrid.right = rcGrid.left + widthby2;
+				_stprintf_s(szString, L"width %5.2f (nm)", (float)slitWidth);
+				this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+			}
 			break;
-		case 3:
-			this->PutValueString(hdc, &rcGrid, L"Slit Label #4", RGB(255, 255, 255), RGB(0, 0, 0));
+		default:
 			break;
 		}
-		rcGrid.left = x + widthby2;
-		rcGrid.right = rcGrid.left + widthby2;
-		this->PutValueString(hdc, &rcGrid, L"width (nm)", RGB(255, 255, 255), RGB(0, 0, 0));
 	}
 	// end painting
 	EndPaint(hwnd, &ps);
@@ -515,6 +707,16 @@ void CDlgScanReview::PutValueString(
 	LOGFONT			lf;
 	HFONT			hfont;
 	int				bkMode = SetBkMode(hdc, TRANSPARENT);
+	COLORREF		tColor = SetTextColor(hdc, txtColor);
+	HBRUSH			hbrBackground;
+	RECT			rc;
+
+	CopyRect(&rc, prc);
+	InflateRect(&rc, -1, -1);
+	// fill in the background
+	hbrBackground = CreateSolidBrush(backColor);
+	FillRect(hdc, &rc, hbrBackground);
+	DeleteObject((HGDIOBJ)hbrBackground);
 
 	// adjust the font
 	GetObject((HGDIOBJ)hOldFont, sizeof(LOGFONT), (LPVOID)&lf);
@@ -537,6 +739,8 @@ void CDlgScanReview::PutValueString(
 	SetTextAlign(hdc, ta);
 	// reset the background mode
 	SetBkMode(hdc, bkMode);
+	// reset the text color
+	SetTextColor(hdc, tColor);
 }
 
 void CDlgScanReview::OnPaintGratingScans(
@@ -552,6 +756,10 @@ void CDlgScanReview::OnPaintGratingScans(
 	int			widthBy4 = (prc->right - prc->left) / 4;
 	int			i;
 	TCHAR		szHeading[32];			// heading string
+	double		minWave;
+	double		maxWave;
+	double		dispersion;
+	TCHAR		szString[MAX_PATH];
 
 	widthBy4 *= 9;
 	widthBy4 /= 10;
@@ -615,6 +823,24 @@ void CDlgScanReview::OnPaintGratingScans(
 		rcGrid.right = rcGrid.left + widthBy4;
 		rcGrid.bottom = rcGrid.top + BOX_HEIGHT;
 		this->PutGratingNumber(hdc, &rcGrid, i, RGB(255, 255, 255), RGB(0, 0, 0));
+		if (this->m_pMyDisplayScanReview->GetGratingScanInfo(i, &minWave, &maxWave, &dispersion))
+		{
+			// min wavel
+			rcGrid.left = rcGrid.right;
+			rcGrid.right = rcGrid.left + widthBy4;
+			_stprintf_s(szString, L"%5.1f", minWave);
+			this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+			// max wavel
+			rcGrid.left = rcGrid.right;
+			rcGrid.right = rcGrid.left + widthBy4;
+			_stprintf_s(szString, L"%5.1f", maxWave);
+			this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+			// dispersion
+			rcGrid.left = rcGrid.right;
+			rcGrid.right = rcGrid.left + widthBy4;
+			_stprintf_s(szString, L"%5.1f", dispersion * this->m_pMyDisplayScanReview->GetOutputSlitWidth());
+			this->PutValueString(hdc, &rcGrid, szString, RGB(255, 255, 255), RGB(0, 0, 0));
+		}
 	}
 }
 
@@ -683,6 +909,65 @@ void CDlgScanReview::OnPaintBoldString(
 	}
 }
 
+void CDlgScanReview::HighlightWord(HWND hwnd, LPCTSTR szWord, COLORREF highlightColor)
+{
+	TCHAR			szString[MAX_PATH];
+	size_t			slen, slen1, slenWord, slenRem;
+	int				bkMode;
+	LPTSTR			szRem;
+	SIZE			txtSize;			// text size
+	long			x;
+	COLORREF		txtColor;
+	UINT			index;
+	HDC				hdc;
+	PAINTSTRUCT		ps;
+	HFONT			hfont;
+	LOGFONT			lf;
+
+	hdc = BeginPaint(hwnd, &ps);
+	bkMode = SetBkMode(hdc, TRANSPARENT);
+	SendMessage(hwnd, WM_GETTEXT, MAX_PATH, (LPARAM)PtrToLong(szString));
+	szRem = StrStrI(szString, szWord);
+	if (NULL != szRem)
+	{
+		hfont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
+		GetObject(hfont, sizeof(LOGFONT), (LPVOID)&lf);
+
+		// paint in 3 parts
+		StringCchLength(szString, MAX_PATH, &slen);
+		StringCchLength(szRem, MAX_PATH, &slen1);
+		// paint the start
+		StringCchLength(szWord, MAX_PATH, &slenWord);
+		GetTextExtentPoint32(hdc, szString, slen - slen1, &txtSize);
+		TextOut(hdc, 0, 0, szString, slen - slen1);
+		// highlight the text
+		txtColor = SetTextColor(hdc, highlightColor);
+	//	txtColor = SetDCPenColor(hdc, highlightColor);
+		x = txtSize.cx;
+		GetTextExtentPoint32(hdc, szWord, slenWord, &txtSize);
+		TextOut(hdc, x, 0, szWord, slenWord);
+		// reset the text color
+		SetTextColor(hdc, txtColor);
+		hfont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
+		GetObject(hfont, sizeof(LOGFONT), (LPVOID)&lf);
+
+	//	SetDCPenColor(hdc, txtColor);
+		// paint the remainder
+		slenRem = slen1 - slenWord;
+		// index for starting character
+		index = slen - slenRem;
+		x += txtSize.cx;
+		TextOut(hdc, x, 0, &(szString[index]), slenRem);
+	}
+	else
+	{
+		// just pint in black
+		StringCchLength(szString, MAX_PATH, &slen);
+		TextOut(hdc, 0, 0, szString, slen);
+	}
+	SetBkMode(hdc, bkMode);
+	EndPaint(hwnd, &ps);
+}
 
 CDlgScanReview::CValueString::CValueString()
 {

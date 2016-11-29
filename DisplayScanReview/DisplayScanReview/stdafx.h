@@ -22,6 +22,8 @@
 
 #include <Propvarutil.h>
 
+#include <vector>
+
 #include <strsafe.h>
 #include "G:\Users\Greg\Documents\Visual Studio 2015\Projects\MyUtils\MyUtils\myutils.h"
 #include "resource.h"

@@ -43,7 +43,7 @@ library DisplayScanReview
 		[id(DISPID_StepSize), bindable]
 		double			StepSize;
 		[id(DISPID_DwellTime), bindable]
-		BSTR			DwellTime;
+		double			DwellTime;
 		[id(DISPID_ScanType)]
 		BSTR			ScanType;
 		[id(DISPID_AutoGain), bindable]
@@ -54,10 +54,15 @@ library DisplayScanReview
 		VARIANT_BOOL	GratingAutoSelect;
 		[id(DISPID_FilterAutoSelect), bindable]
 		VARIANT_BOOL	FilterAutoSelect;
+		[id(DISPID_InitializeBeforeMeasurement), bindable, helpstring("Flag initialization before measurement")]
+		VARIANT_BOOL	InitializeBeforeMeasurement;
 	methods:
 		[id(DISPID_DisplayWindow), helpstring("Display the dialog window")]
 		VARIANT_BOOL		DisplayWindow(
 								[in]		long		hwndParent);
+		[id(DISPID_SetOptFile), helpstring("Set the Opt file object")]
+		VARIANT_BOOL		SetOptFile(
+								[in]		VARIANT			optFile);
 	}
 	[
 		uuid(2402515A-2182-499C-A602-4B6E4E734D33),
@@ -67,6 +72,18 @@ library DisplayScanReview
 	{
 	properties:
 	methods:
+		[id(DISPID_requestDispersion), helpstring("Ask for dispersion")]
+		void				requestDispersion(
+								[in]		long		gratingID,
+								[out]		double	*	dispersion);
+		[id(DISPID_requestCurrentGrating), helpstring("ask for the current grating")]
+		void				requestCurrentGrating(
+								[out]		short int*	currentGrating);
+		[id(DISPID_requestGratingInfo), helpstring("ask for grating min and max wave")]
+		void				requestGratingInfo(
+								[in]		short int	grating,
+								[out]		double	*	maxWave,
+								[out]		double	*	minWave);
 	}
 	[
 		uuid(EB23185F-66AA-46F9-A0DE-AFFBE9025996),

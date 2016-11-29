@@ -1,15 +1,22 @@
 #pragma once
 #include "MyDialog.h"
 
+class CMyDisplayScanReview;
+
 class CDlgScanReview : public CMyDialog
 {
 public:
-	CDlgScanReview();
+	CDlgScanReview(CMyDisplayScanReview * pMyDisplayScanReview);
 	virtual ~CDlgScanReview();
+	BOOL				GetInitializeBeforeMeasure();		// get the initialize before measure flag
 protected:
 	virtual BOOL		OnInitDialog();
 	virtual BOOL		OnReturnClicked(
 							UINT		nID);
+	virtual BOOL		OnCommand(
+							WORD		wmID,
+							WORD		wmEvent);
+	void				DisplayInitializeBeforeMeasure();
 	// paint my grid
 	void				OnPaintMyGrid();
 	// paint a thick line
@@ -47,6 +54,10 @@ protected:
 	// subclass a label window
 	void				SubclassLabelWindow(
 							UINT			nID);
+	void				HighlightWord(
+							HWND			hwnd,
+							LPCTSTR			szWord, 
+							COLORREF		highlightColor);
 private:
 	// value string writer
 	class CValueString
@@ -87,9 +98,13 @@ private:
 		COLORREF		m_txtColor;
 	};
 	friend CValueString;
-//	WNDPROC				m_wpOrig;				// original window procedure for the grid display
+
+	CMyDisplayScanReview * m_pMyDisplayScanReview;
 	// value data array
 	CValueString		m_valueData[NUM_VALUEDATA];
+	TCHAR				m_szDetector[MAX_PATH];
+	// flag initialize before measurement
+	BOOL				m_fInitializeBeforeMeasure;
 
 	// structure for label window subclass
 	struct SUBCLASS_STR

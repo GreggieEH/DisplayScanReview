@@ -22,8 +22,13 @@
 #define				DISPID_AutoTimeConstant			0x010f
 #define				DISPID_GratingAutoSelect		0x0110
 #define				DISPID_FilterAutoSelect			0x0111
+#define				DISPID_InitializeBeforeMeasurement	0x0112
 
 // methods
 #define				DISPID_DisplayWindow			0x0130
+#define				DISPID_SetOptFile				0x0131
 
 // events
+#define				DISPID_requestDispersion		0x0150
+#define				DISPID_requestCurrentGrating	0x0151
+#define				DISPID_requestGratingInfo		0x0152
