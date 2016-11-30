@@ -366,6 +366,10 @@ void CDlgScanReview::OnPaintMyGrid()
 	this->PutValueString(hdc, &rcGrid, L"Working Directory", RGB(255, 255, 255), RGB(0, 0, 0));
 	rcGrid.left = rcGrid.right;
 	rcGrid.right = rcGrid.left + widthby2;
+	// change string value
+	this->m_valueData[INDEX_WORKINGDIRECTORY].GetValueString(szString, MAX_PATH);
+	PathCompactPath(hdc, szString, widthby2-10);
+	this->m_valueData[INDEX_WORKINGDIRECTORY].SetValueString(szString);
 	this->m_valueData[INDEX_WORKINGDIRECTORY].SetDisplayRect(&rcGrid);
 	this->m_valueData[INDEX_WORKINGDIRECTORY].PaintValue(this, hdc);
 	// aqcuisition configuration
@@ -923,15 +927,27 @@ void CDlgScanReview::HighlightWord(HWND hwnd, LPCTSTR szWord, COLORREF highlight
 	PAINTSTRUCT		ps;
 	HFONT			hfont;
 	LOGFONT			lf;
+	HFONT			hOldFont;			// = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
+	HFONT			hilightFont;
 
 	hdc = BeginPaint(hwnd, &ps);
+	hOldFont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
+	GetObject(hOldFont, sizeof(LOGFONT), (LPVOID)&lf);
+	lf.lfWeight = 500;
+	StringCchCopy(lf.lfFaceName, 32, L"Arial");
+	hfont = CreateFontIndirect(&lf);
+	SelectObject(hdc, (HGDIOBJ)hfont);
+	// highlight font
+	lf.lfWeight = 600;
+	StringCchCopy(lf.lfFaceName, 32, L"Arial");
+	hilightFont = CreateFontIndirect(&lf);
+
 	bkMode = SetBkMode(hdc, TRANSPARENT);
 	SendMessage(hwnd, WM_GETTEXT, MAX_PATH, (LPARAM)PtrToLong(szString));
 	szRem = StrStrI(szString, szWord);
 	if (NULL != szRem)
 	{
-		hfont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
-		GetObject(hfont, sizeof(LOGFONT), (LPVOID)&lf);
+//		hfont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
 
 		// paint in 3 parts
 		StringCchLength(szString, MAX_PATH, &slen);
@@ -941,17 +957,16 @@ void CDlgScanReview::HighlightWord(HWND hwnd, LPCTSTR szWord, COLORREF highlight
 		GetTextExtentPoint32(hdc, szString, slen - slen1, &txtSize);
 		TextOut(hdc, 0, 0, szString, slen - slen1);
 		// highlight the text
+		SelectObject(hdc, (HGDIOBJ)hilightFont);
 		txtColor = SetTextColor(hdc, highlightColor);
 	//	txtColor = SetDCPenColor(hdc, highlightColor);
 		x = txtSize.cx;
 		GetTextExtentPoint32(hdc, szWord, slenWord, &txtSize);
 		TextOut(hdc, x, 0, szWord, slenWord);
 		// reset the text color
+		SelectObject(hdc, (HGDIOBJ)hfont);
 		SetTextColor(hdc, txtColor);
-		hfont = (HFONT)GetCurrentObject(hdc, OBJ_FONT);
-		GetObject(hfont, sizeof(LOGFONT), (LPVOID)&lf);
 
-	//	SetDCPenColor(hdc, txtColor);
 		// paint the remainder
 		slenRem = slen1 - slenWord;
 		// index for starting character
@@ -965,6 +980,11 @@ void CDlgScanReview::HighlightWord(HWND hwnd, LPCTSTR szWord, COLORREF highlight
 		StringCchLength(szString, MAX_PATH, &slen);
 		TextOut(hdc, 0, 0, szString, slen);
 	}
+	// select out the font
+	SelectObject(hdc, (HGDIOBJ)hOldFont);
+	DeleteObject((HGDIOBJ)hfont);
+	DeleteObject((HGDIOBJ)hilightFont);
+	// reset the background mode
 	SetBkMode(hdc, bkMode);
 	EndPaint(hwnd, &ps);
 }

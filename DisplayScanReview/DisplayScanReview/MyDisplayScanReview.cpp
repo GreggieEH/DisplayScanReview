@@ -1113,6 +1113,7 @@ void CMyDisplayScanReview::FormGratingScans()
 			scanInfo.dispersion = this->FirerequestDispersion(scanInfo.grating);
 			this->m_gratingScans.push_back(scanInfo);
 			startWave = maxWave;
+			if (maxWave >= this->m_StopWave) return;
 		}
 		this->FirerequestGratingInfo(2, &minWave, &maxWave);
 		if (maxWave > startWave)
@@ -1124,6 +1125,7 @@ void CMyDisplayScanReview::FormGratingScans()
 			scanInfo.dispersion = this->FirerequestDispersion(scanInfo.grating);
 			this->m_gratingScans.push_back(scanInfo);
 			startWave = maxWave;
+			if (maxWave >= this->m_StopWave) return;
 		}
 		this->FirerequestGratingInfo(3, &minWave, &maxWave);
 		if (maxWave > startWave)

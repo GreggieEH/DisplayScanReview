@@ -22,6 +22,7 @@
 #define				IDC_LBLSIGNALCABLE				1009
 #define				IDC_LBLDETECTORSIGNAL			1010
 #define				IDC_LBLOUTPUTPORT				1011
+#define				IDC_LINE1						1012
 
 // Next default values for new objects
 // 
