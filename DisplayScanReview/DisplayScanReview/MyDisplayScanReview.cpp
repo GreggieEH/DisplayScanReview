@@ -40,6 +40,7 @@ CMyDisplayScanReview::CMyDisplayScanReview(IUnknown * pUnkOuter) :
 	StringCchCopy(this->m_slitInfo[2].slitTitle, MAX_PATH, L"intermediateSlit");
 	m_slitInfo[2].slitName[0] = '\0';
 	m_slitInfo[2].slitWidth = 1.0;
+	this->m_szConfigDirectory[0] = '\0';
 }
 
 CMyDisplayScanReview::~CMyDisplayScanReview()
@@ -240,6 +241,8 @@ HRESULT CMyDisplayScanReview::DisplayWindow(
 	VARIANTARG		varg;
 	UINT			uArgErr;
 	BOOL			fSuccess = FALSE;
+	// recall the initialize before creating dialog
+	this->RecallSettings();
 	CDlgScanReview	dlg(this);
 
 	// form the grating scans info
@@ -248,11 +251,14 @@ HRESULT CMyDisplayScanReview::DisplayWindow(
 	VariantInit(&varg);
 	hr = DispGetParam(pDispParams, 0, VT_I4, &varg, &uArgErr);
 	if (FAILED(hr)) return hr;
+	// recall the initialize before measurement flag
+	this->RecallSettings();
 	fSuccess = IDOK == dlg.DoOpenDialog((HWND)varg.lVal, GetServer()->GetInstance());
 	if (fSuccess)
 	{
 		// store initialize flag
 		this->m_InitializeBeforeMeasurement = dlg.GetInitializeBeforeMeasure();
+		this->StoreSettings();
 	}
 	if (NULL != pVarResult)
 	{
@@ -757,6 +763,12 @@ HRESULT	CMyDisplayScanReview::SetOptFile(
 	DISPID			dispid;
 	long			i;
 
+	// configuration file folder
+	if (this->GetConfigFile(pDispParams->rgvarg[0].pdispVal, szString, MAX_PATH))
+	{
+		StringCchCopy(this->m_szConfigDirectory, MAX_PATH, szString);
+		PathRemoveFileSpec(this->m_szConfigDirectory);
+	}
 	if (this->GetADInfo(pDispParams->rgvarg[0].pdispVal, szInfoString, MAX_PATH))
 	{
 		// check if using Lockin
@@ -824,6 +836,27 @@ HRESULT	CMyDisplayScanReview::SetOptFile(
 		pdisp->Release();
 	}
 	return S_OK;
+}
+
+// get the configuration file
+BOOL CMyDisplayScanReview::GetConfigFile(
+	IDispatch	*	pdispOptFile,
+	LPTSTR			szConfigFile,
+	UINT			nBufferSize)
+{
+	HRESULT			hr;
+	DISPID			dispid;
+	VARIANT			varResult;
+	BOOL			fSuccess = FALSE;
+	szConfigFile[0] = '\0';
+	Utils_GetMemid(pdispOptFile, L"ConfigFile", &dispid);
+	hr = Utils_InvokePropertyGet(pdispOptFile, dispid, NULL, 0, &varResult);
+	if (SUCCEEDED(hr))
+	{
+		hr = VariantToString(varResult, szConfigFile, nBufferSize);
+		VariantClear(&varResult);
+	}
+	return PathFileExists(szConfigFile);
 }
 
 // read line from string
@@ -1045,10 +1078,25 @@ void CMyDisplayScanReview::GetdetectorTemperature(
 {
 	DISPID			dispid;
 	double			temperature;
+	HRESULT			hr;
+	VARIANT			Value;
+	StringCchCopy(szString, nBufferSize, L"Not Set");
 	szString[0] = '\0';
 	Utils_GetMemid(pdisp, L"temperature", &dispid);
-	temperature = Utils_GetDoubleProperty(pdisp, dispid);
-	StringCchPrintf(szString, nBufferSize, L"%1d", (long)floor(temperature + 0.5));
+	hr = Utils_InvokePropertyGet(pdisp, dispid, NULL, 0, &Value);
+	if (VT_BSTR == Value.vt)
+	{
+		VariantClear(&Value);
+	}
+	else
+	{
+		hr = VariantToDouble(Value, &temperature);
+//		temperature = Utils_GetDoubleProperty(pdisp, dispid);
+		if (SUCCEEDED(hr))
+		{
+			StringCchPrintf(szString, nBufferSize, L"%1d", (long)floor(temperature + 0.5));
+		}
+	}
 }
 
 void CMyDisplayScanReview::GetinputOpticConfig(
@@ -1179,3 +1227,168 @@ double CMyDisplayScanReview::GetOutputSlitWidth()
 	this->GetSlitInfo(L"outputSlit", slitName, MAX_PATH, &slitWidth);
 	return slitWidth;
 }
+
+// store, recall settings
+void CMyDisplayScanReview::RecallSettings()
+{
+	TCHAR			szFilePath[MAX_PATH];
+	IDispatch	*	pdispFSO;
+	IDispatch	*	pdispTextFile;
+	TCHAR			szLine[MAX_PATH];
+	long			lval = 0;
+
+	StringCchCopy(szFilePath, MAX_PATH, this->m_szConfigDirectory);
+	PathAppend(szFilePath, L"DisplayScanReview.txt");
+	if (PathFileExists(szFilePath))
+	{
+		if (this->CreateFileSystemObject(&pdispFSO))
+		{
+			if (this->OpenFileForReading(pdispFSO, szFilePath, &pdispTextFile))
+			{
+				if (this->ReadOneLine(pdispTextFile, szLine, MAX_PATH))
+				{
+					if (NULL != StrStrI(szLine, L"InitializeBeforeMeasurement = "))
+					{
+						if (1 == _stscanf_s(szLine, L"InitializeBeforeMeasurement = %d", &lval))
+						{
+							this->m_InitializeBeforeMeasurement = 0 != lval;
+						}
+					}
+				}
+				pdispTextFile->Release();
+			}
+			pdispFSO->Release();
+		}
+	}
+}
+
+void CMyDisplayScanReview::StoreSettings()
+{
+	TCHAR			szFilePath[MAX_PATH];
+	IDispatch	*	pdispFSO;
+	IDispatch	*	pdispTextFile;
+	TCHAR			szLine[MAX_PATH];
+
+	if (!PathFileExists(this->m_szConfigDirectory)) return;
+	if (this->CreateFileSystemObject(&pdispFSO))
+	{
+		StringCchCopy(szFilePath, MAX_PATH, this->m_szConfigDirectory);
+		PathAppend(szFilePath, L"DisplayScanReview.txt");
+		if (this->OpenFileForWriting(pdispFSO, szFilePath, &pdispTextFile))
+		{
+			StringCchPrintf(szLine, MAX_PATH, L"InitializeBeforeMeasurement = %1d", this->m_InitializeBeforeMeasurement ? 1 : 0);
+			this->WriteOneLine(pdispTextFile, szLine);
+		}
+		pdispFSO->Release();
+	}
+}
+
+BOOL CMyDisplayScanReview::CreateFileSystemObject(
+	IDispatch	**	ppdisp)
+{
+	HRESULT			hr;
+	CLSID			clsid;
+
+	*ppdisp = NULL;
+	hr = CLSIDFromProgID(L"Scripting.FileSystemObject", &clsid);
+	if (SUCCEEDED(hr)) hr = CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, IID_IDispatch, (LPVOID*)ppdisp);
+	return SUCCEEDED(hr);
+}
+
+BOOL CMyDisplayScanReview::OpenFileForReading(
+	IDispatch	*	pdispFSO,
+	LPCTSTR			szFileName,
+	IDispatch	**	ppdispTextFile)
+{
+	HRESULT				hr;
+	DISPID				dispid;
+	VARIANTARG			avarg[4];
+	VARIANT				varResult;
+	BOOL				fSuccess = FALSE;
+	*ppdispTextFile = NULL;
+	Utils_GetMemid(pdispFSO, L"OpenTextFile", &dispid);
+	InitVariantFromString(szFileName, &avarg[3]);
+	InitVariantFromInt16(1, &avarg[2]);				// open for reading
+	InitVariantFromBoolean(FALSE, &avarg[1]);		// don't create file 
+	Utils_PutOptional(&avarg[0]);
+	hr = Utils_InvokeMethod(pdispFSO, dispid, avarg, 4, &varResult);
+	VariantClear(&avarg[3]);
+	if (SUCCEEDED(hr))
+	{
+		if (VT_DISPATCH == varResult.vt && NULL != varResult.pdispVal)
+		{
+			*ppdispTextFile = varResult.pdispVal;
+			varResult.pdispVal->AddRef();
+			fSuccess = TRUE;
+		}
+		VariantClear(&varResult);
+	}
+	return fSuccess;
+}
+
+BOOL CMyDisplayScanReview::OpenFileForWriting(
+	IDispatch	*	pdispFSO,
+	LPCTSTR			szFileName,
+	IDispatch	**	ppdispTextFile)
+{
+	HRESULT				hr;
+	DISPID				dispid;
+	VARIANTARG			avarg[4];
+	VARIANT				varResult;
+	BOOL				fSuccess = FALSE;
+	*ppdispTextFile = NULL;
+	Utils_GetMemid(pdispFSO, L"OpenTextFile", &dispid);
+	InitVariantFromString(szFileName, &avarg[3]);
+	InitVariantFromInt16(2, &avarg[2]);				// open for writing
+	InitVariantFromBoolean(TRUE, &avarg[1]);		// don't create file 
+	Utils_PutOptional(&avarg[0]);
+	hr = Utils_InvokeMethod(pdispFSO, dispid, avarg, 4, &varResult);
+	VariantClear(&avarg[3]);
+	if (SUCCEEDED(hr))
+	{
+		if (VT_DISPATCH == varResult.vt && NULL != varResult.pdispVal)
+		{
+			*ppdispTextFile = varResult.pdispVal;
+			varResult.pdispVal->AddRef();
+			fSuccess = TRUE;
+		}
+		VariantClear(&varResult);
+	}
+	return fSuccess;
+}
+
+BOOL CMyDisplayScanReview::ReadOneLine(
+	IDispatch	*	pdispTextFile,
+	LPTSTR			szLine,
+	UINT			nBufferSize)
+{
+	HRESULT			hr;
+	DISPID			dispid;
+	VARIANT			varResult;
+	BOOL			fSuccess = FALSE;
+	szLine[0] = '\0';
+	Utils_GetMemid(pdispTextFile, L"ReadLine", &dispid);
+	hr = Utils_InvokeMethod(pdispTextFile, dispid, NULL, 0, &varResult);
+	if (SUCCEEDED(hr))
+	{
+		hr = VariantToString(varResult, szLine, nBufferSize);
+		fSuccess = SUCCEEDED(hr);
+		VariantClear(&varResult);
+	}
+	return fSuccess;
+}
+
+BOOL CMyDisplayScanReview::WriteOneLine(
+	IDispatch	*	pdispTextFile,
+	LPCTSTR			szLine)
+{
+	HRESULT			hr;
+	DISPID			dispid;
+	VARIANTARG		varg;
+	Utils_GetMemid(pdispTextFile, L"WriteLine", &dispid);
+	InitVariantFromString(szLine, &varg);
+	hr = Utils_InvokeMethod(pdispTextFile, dispid, &varg, 1, NULL);
+	VariantClear(&varg);
+	return SUCCEEDED(hr);
+}
+

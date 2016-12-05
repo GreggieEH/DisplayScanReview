@@ -32,8 +32,9 @@ CDlgScanReview::CDlgScanReview(CMyDisplayScanReview * pMyDisplayScanReview) :
 		}
 		else
 		{
-			this->m_valueData[INDEX_LOCKINGAIN].SetBackColor(RGB(255, 0, 0));
+//			this->m_valueData[INDEX_LOCKINGAIN].SetBackColor(RGB(255, 0, 0));
 			this->m_valueData[INDEX_LOCKINGAIN].SetValueString(L"NOT SET");
+			this->m_valueData[INDEX_LOCKINGAIN].SetTextColor(RGB(255, 0, 0));
 		}
 		this->m_pMyDisplayScanReview->GetLockinTimeConstant(szString, MAX_PATH);
 		StringCchLength(szString, MAX_PATH, &slen);
@@ -43,8 +44,9 @@ CDlgScanReview::CDlgScanReview(CMyDisplayScanReview * pMyDisplayScanReview) :
 		}
 		else
 		{
-			this->m_valueData[INDEX_LOCKINTIMECONSTANT].SetBackColor(RGB(255, 0, 0));
+//			this->m_valueData[INDEX_LOCKINTIMECONSTANT].SetBackColor(RGB(255, 0, 0));
 			this->m_valueData[INDEX_LOCKINTIMECONSTANT].SetValueString(L"NOT SET");
+			this->m_valueData[INDEX_LOCKINTIMECONSTANT].SetTextColor(RGB(255, 0, 0));
 		}
 	}
 	else
@@ -59,40 +61,44 @@ CDlgScanReview::CDlgScanReview(CMyDisplayScanReview * pMyDisplayScanReview) :
 	}
 	else
 	{
-		this->m_valueData[INDEX_DETECTORNAME].SetBackColor(RGB(255, 0, 0));
+//		this->m_valueData[INDEX_DETECTORNAME].SetBackColor(RGB(255, 0, 0));
 		this->m_valueData[INDEX_DETECTORNAME].SetValueString(L"NOT SET");
+		this->m_valueData[INDEX_DETECTORNAME].SetTextColor(RGB(255, 0, 0));
 	}
 	this->m_pMyDisplayScanReview->GetDetectorGain(szString, MAX_PATH);
 	StringCchLength(szString, MAX_PATH, &slen);
-	if (slen > 0)
+	if (slen > 0 && 0 != lstrcmpi(szString, L"Not Set"))
 	{
 		this->m_valueData[INDEX_DETECTORGAIN].SetValueString(szString);
 	}
 	else
 	{
-		this->m_valueData[INDEX_DETECTORGAIN].SetBackColor(RGB(255, 0, 0));
+//		this->m_valueData[INDEX_DETECTORGAIN].SetBackColor(RGB(255, 0, 0));
 		this->m_valueData[INDEX_DETECTORGAIN].SetValueString(L"NOT SET");
+		this->m_valueData[INDEX_DETECTORGAIN].SetTextColor(RGB(255, 0, 0));
 	}
 	this->m_pMyDisplayScanReview->GetDetectorTemperature(szString, MAX_PATH);
 	StringCchLength(szString, MAX_PATH, &slen);
-	if (slen > 0)
+	if (slen > 0 && 0 != lstrcmpi(szString, L"Not Set"))
 	{
 		this->m_valueData[INDEX_DETECTORTEMPERATURE].SetValueString(szString);
 	}
 	else
 	{
 		this->m_valueData[INDEX_DETECTORTEMPERATURE].SetValueString(L"NOT SET");
+		this->m_valueData[INDEX_DETECTORTEMPERATURE].SetTextColor(RGB(255, 0, 0));
 	}
 	this->m_pMyDisplayScanReview->GetInputOptic(szString, MAX_PATH);
 	StringCchLength(szString, MAX_PATH, &slen);
-	if (slen > 0)
+	if (slen > 0 && 0 != lstrcmpi(szString, L"Not Set"))
 	{
 		this->m_valueData[INDEX_INPUTOPTIC].SetValueString(szString);
 	}
 	else
 	{
-		this->m_valueData[INDEX_INPUTOPTIC].SetBackColor(RGB(255, 0, 0));
+//		this->m_valueData[INDEX_INPUTOPTIC].SetBackColor(RGB(255, 0, 0));
 		this->m_valueData[INDEX_INPUTOPTIC].SetValueString(L"NOT SET");
+		this->m_valueData[INDEX_INPUTOPTIC].SetTextColor(RGB(255, 0, 0));
 	}
 	_stprintf_s(szString, L"%6.2f", (float)this->m_pMyDisplayScanReview->GetStartWave());
 	this->m_valueData[INDEX_STARTWAVE].SetValueString(szString);

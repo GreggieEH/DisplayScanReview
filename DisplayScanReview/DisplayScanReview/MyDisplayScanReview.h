@@ -203,6 +203,31 @@ protected:
 								UINT			nBufferSize);
 	// form the grating scan info
 	void					FormGratingScans();
+	// get the configuration file
+	BOOL					GetConfigFile(
+								IDispatch	*	pdispOptFile,
+								LPTSTR			szConfigFile,
+								UINT			nBufferSize);
+	// store, recall settings
+	void					RecallSettings();
+	void					StoreSettings();
+	BOOL					CreateFileSystemObject(
+								IDispatch	**	ppdisp);
+	BOOL					OpenFileForReading(
+								IDispatch	*	pdispFSO,
+								LPCTSTR			szFileName,
+								IDispatch	**	ppdispTextFile);
+	BOOL					OpenFileForWriting(
+								IDispatch	*	pdispFSO,
+								LPCTSTR			szFileName,
+								IDispatch	**	ppdispTextFile);
+	BOOL					ReadOneLine(
+								IDispatch	*	pdispTextFile,
+								LPTSTR			szLine,
+								UINT			nBufferSize);
+	BOOL					WriteOneLine(
+								IDispatch	*	pdispTextFile,
+								LPCTSTR			szLine);
 
 private:
 	TCHAR			m_szFileComment[MAX_PATH];
@@ -224,6 +249,7 @@ private:
 	BOOL			m_GratingAutoSelect;
 	BOOL			m_FilterAutoSelect;
 	BOOL			m_InitializeBeforeMeasurement;
+	TCHAR			m_szConfigDirectory[MAX_PATH];				// configuration directory
 
 	// grating scan info
 	struct gratingScanInfo
