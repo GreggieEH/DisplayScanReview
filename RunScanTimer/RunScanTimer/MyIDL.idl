@@ -1,0 +1,66 @@
+// MyIDL.idl
+// IDL file for the Simple Com object
+
+#include "dispids.h"
+
+[
+	uuid(5F8079D8-E47E-46AE-98E6-DF762E2E62DC),
+	helpstring(""),
+	version(1.0)
+]
+library RunScanTimer
+{
+	importlib("stdole32.tlb");
+	[
+		uuid(238B2817-4B7E-41CD-8B74-2CBCF15C281C),
+		helpstring("Interface")
+	]
+	dispinterface IRunScanTimer
+	{
+	properties:
+		[id(DISPID_DwellTime), helpstring("Scanning dwell time in milli seconds")]
+		long			DwellTime;
+		[id(DISPID_IntegrationTime), helpstring("Scanning integration time in milli seconds")]
+		long			IntegrationTime;
+		[id(DISPID_CallingProcess), readonly, helpstring("process id for the calling process")]
+		DWORD			CallingProcess;
+		[id(DISPID_UseIntegrationTime), helpstring("Flag use integration time to calculate the remaining time")]
+		VARIANT_BOOL	UseIntegrationTime;
+		[id(DISPID_CallingExe), readonly, helpstring("calling executable")]
+		LPCTSTR			CallingExe;
+		[id(DISPID_TotalScanTime), readonly, helpstring("Total scan time in seconds")]
+		long			TotalScanTime;
+	methods:
+		[id(DISPID_ScanStepped), helpstring("Scanning stepped")]
+		void			ScanStepped();
+		[id(DISPID_EstimatedRemainingTime), helpstring("Estimated remaining time in seconds")]
+		long			EstimatedRemainingTime(
+			[in]		long			remainingSteps);
+		[id(DISPID_SetCallingProcess), helpstring("Set the calling process")]
+		VARIANT_BOOL	SetCallingProcess(
+			[in]		BSTR			CallingProcess);
+		[id(DISPID_InitScan), helpstring("Initialize scanning")]
+		VARIANT_BOOL	InitScan(
+							[in]		VARIANT_BOOL	resetTotal);
+		[id(DISPID_ScanningEnded), helpstring("Scanning ended")]
+		void			ScanningEnded();
+	}
+	[
+		uuid(C00F3725-1A64-449B-94B9-42E914CAFCEE),
+		helpstring(" event interface")
+	]
+	dispinterface _RunScanTimer
+	{
+	properties:
+	methods:
+	}
+	[
+		uuid(52FF5DF8-E058-4AEC-91B2-48FF4E5036DC),
+		helpstring("class")
+	]
+	coclass RunScanTimer
+	{
+		[default]				dispinterface			IRunScanTimer;
+		[default, source]		dispinterface			_RunScanTimer;
+	}
+}

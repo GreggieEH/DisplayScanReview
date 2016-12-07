@@ -1,0 +1,70 @@
+// ScanTimer.idl
+// IDL file for the ScanTimer server
+
+#include <olectl.h>
+#include "dispids.h"
+
+[
+	uuid(B2A8E6DD-4AA2-46B0-9471-16BC49BFF245),
+	helpstring("ScanTimer type library"),
+	version(1.0)
+]
+library ScanTimer
+{
+	importlib("stdole32.tlb");
+	[
+		uuid(68E3FE73-58EC-405E-A19E-B07EF835C3D3),
+		helpstring("IScanTimer interface")
+	]
+	dispinterface IScanTimer
+	{
+	properties:
+		[id(DISPID_DwellTime), helpstring("Scanning dwell time in milli seconds")]
+		long			DwellTime;
+		[id(DISPID_IntegrationTime), helpstring("Scanning integration time in milli seconds")]
+		long			IntegrationTime;
+		[id(DISPID_CallingProcess), readonly, helpstring("process id for the calling process")]
+		DWORD			CallingProcess;
+		[id(DISPID_UseIntegrationTime), helpstring("Flag use integration time to calculate the remaining time")]
+		VARIANT_BOOL	UseIntegrationTime;
+		[id(DISPID_CallingExe), readonly, helpstring("calling executable")]
+		LPCTSTR			CallingExe;
+		[id(DISPID_TotalScanTime), readonly, helpstring("Total scan time in seconds")]
+		long			TotalScanTime;
+	methods:
+		[id(DISPID_ScanStepped), helpstring("Scanning stepped")]
+		void			ScanStepped();
+		[id(DISPID_EstimatedRemainingTime), helpstring("Estimated remaining time in seconds")]
+		long			EstimatedRemainingTime(
+							[in]		long			remainingSteps);
+		[id(DISPID_SetCallingProcess), helpstring("Set the calling process")]
+		VARIANT_BOOL	SetCallingProcess(
+							[in]		BSTR			CallingProcess);
+		[id(DISPID_InitScan), helpstring("Initialize scanning")]
+		VARIANT_BOOL	InitScan(
+							[in]		VARIANT_BOOL	resetTotal);
+		[id(DISPID_ScanningEnded), helpstring("Scanning ended")]
+		void			ScanningEnded();
+	}
+	[
+		uuid(3E60E7BC-D9D4-4456-83FA-2C5CEEC19099),
+		helpstring("_ScanTimer event interface")
+	]
+	dispinterface _ScanTimer
+	{
+	properties:
+	methods:
+		[id(DISPID_Error), helpstring("Some kind of error")]
+		void			Error(
+							[in]		BSTR		err);
+	}
+	[
+		uuid(549C29D4-338C-426D-BAB5-A8B651B63AFD),
+		helpstring("ScanTimer class")
+	]
+	coclass ScanTimer
+	{
+		[default]				dispinterface		IScanTimer;
+		[default, source]		dispinterface		_ScanTimer;
+	}
+}
